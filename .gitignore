@@ -21,6 +21,6 @@ results/*
 *$py.class
 *.pyc
 
-code/logs/*
-code/checkpoints/*
-code/misclassified/*
+#code/logs/*
+#code/checkpoints/*
+#code/misclassified/*
