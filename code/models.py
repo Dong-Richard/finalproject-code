@@ -53,14 +53,6 @@ class YourModel(tf.keras.Model):
         #             explicitly reshape any tensors anywhere in your network.
 
         self.architecture = [
-              Conv2D(10, 5, 1, padding='same', activation="relu"),
-              MaxPool2D(2),
-              Dense(32, activation = "relu"),
-              Flatten(),
-              Dense(hp.num_classes, activation="softmax")
-        ]
-        
-        """ 
               Conv2D(32, 3, 1, padding='same', activation="relu"),
               MaxPool2D(2),
 
@@ -73,7 +65,87 @@ class YourModel(tf.keras.Model):
               Flatten(),
               Dropout(0.5),
               Dense(hp.num_classes, activation="softmax") 
-        """
+        ]
+        
+              
+
+    def call(self, x):
+        """ Passes input image through the network. """
+
+        for layer in self.architecture:
+            x = layer(x)
+
+        return x
+
+    @staticmethod
+    def loss_fn(labels, predictions):
+        """ Loss function for the model. """
+
+        # TASK 1
+        # TODO: Select a loss function for your network 
+        #       (see the documentation for tf.keras.losses)
+
+        lf = tf.keras.losses.SparseCategoricalCrossentropy()
+        return lf(labels, predictions)
+
+
+class BoundingBoxModel(tf.keras.Model):
+    
+    def __init__(self, num_classes):
+        super(BoundingBoxModel, self).__init__()
+        self.num_classes = num_classes
+
+        # TASK 1
+        # TODO: Select an optimizer for your network (see the documentation
+        #       for tf.keras.optimizers)
+        self.optimizer = tf.keras.optimizers.Adam()
+        # TASK 1
+        # TODO: Build your own convolutional neural network, using Dropout at
+        #       least once. The input image will be passed through each Keras
+        #       layer in self.architecture sequentially. Refer to the imports
+        #       to see what Keras layers you can use to build your network.
+        #       Feel free to import other layers, but the layers already
+        #       imported are enough for this assignment.
+        #
+        #       Remember: Your network must have under 15 million parameters!
+        #       You will see a model summary when you run the program that
+        #       displays the total number of parameters of your network.
+        #
+        #       Remember: Because this is a 15-scene classification task,
+        #       the output dimension of the network must be 15. That is,
+        #       passing a tensor of shape [batch_size, img_size, img_size, 1]
+        #       into the network will produce an output of shape
+        #       [batch_size, 15].
+        #
+        #       Note: Keras layers such as Conv2D and Dense give you the
+        #             option of defining an activation function for the layer.
+        #             For example, if you wanted ReLU activation on a Conv2D
+        #             layer, you'd simply pass the string 'relu' to the
+        #             activation parameter when instantiating the layer.
+        #             While the choice of what activation functions you use
+        #             is up to you, the final layer must use the softmax
+        #             activation function so that the output of your network
+        #             is a probability distribution.
+        #
+        #       Note: Flatten is a very useful layer. You shouldn't have to
+        #             explicitly reshape any tensors anywhere in your network.
+
+        self.architecture = [
+              Conv2D(32, 3, 1, padding='same', activation="relu"),
+              MaxPool2D(2),
+
+              Conv2D(64, 3, 1, padding='same', activation="relu"),
+              MaxPool2D(2),
+
+              Conv2D(128, 3, 1, padding='same', activation="relu"),
+              MaxPool2D(2),
+
+              Flatten(),
+              Dropout(0.5),
+              Dense(self.num_classes, activation="softmax") 
+        ]
+        
+              
 
     def call(self, x):
         """ Passes input image through the network. """

@@ -12,7 +12,7 @@ from datetime import datetime
 import tensorflow as tf
 
 import hyperparameters as hp
-from models import YourModel, VGGModel
+from models import YourModel, VGGModel, BoundingBoxModel
 from preprocess import Datasets
 from skimage.transform import resize
 from tensorboard_utils import \
@@ -36,7 +36,7 @@ def parse_args():
     parser.add_argument(
         '--task',
         required=True,
-        choices=['1', '3'],
+        choices=['1', '3', '4'],
         help='''Which task of the assignment to run -
         training from scratch (1), or fine tuning VGG-16 (3).''')
     parser.add_argument(
@@ -163,6 +163,7 @@ def train(model, datasets, checkpoint_path, logs_path, init_epoch):
         callback_list.append(ConfusionMatrixLogger(logs_path, datasets))
 
     # Begin training
+    print((datasets.train_data))
     model.fit(
         x=datasets.train_data,
         validation_data=datasets.test_data,
@@ -223,6 +224,18 @@ def main():
 
         # Print summary of model
         model.summary()
+        model.save("model.keras")
+    elif ARGS.task == '4':
+        model = BoundingBoxModel(4)
+        model(tf.keras.Input(shape=(hp.img_size, hp.img_size, 3)))
+        checkpoint_path = "checkpoints" + os.sep + \
+            "your_model" + os.sep + timestamp + os.sep
+        logs_path = "logs" + os.sep + "your_model" + \
+            os.sep + timestamp + os.sep
+
+        # Print summary of model
+        model.summary()
+        # model.save("model.keras")
     else:
         model = VGGModel()
         checkpoint_path = "checkpoints" + os.sep + \
@@ -234,9 +247,10 @@ def main():
         # Print summaries for both parts of the model
         model.vgg16.summary()
         model.head.summary()
-
+        
         # Load base of VGG model
         model.vgg16.load_weights(ARGS.load_vgg, by_name=True)
+        model.save("model.keras") 
 
     # Load checkpoints
     if ARGS.load_checkpoint is not None:
